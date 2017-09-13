@@ -28,6 +28,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, returnedDB) => {
   });*/
 
   //Challenge: Delete all the duplicates ('Brendan') and grab a specific one to delete
+  
  returnedDB.collection('Users').deleteMany({name: 'Brendan'}).then((results) => {
     console.log(`Number of deleted users: ${results.result.n}`);
   })*/
