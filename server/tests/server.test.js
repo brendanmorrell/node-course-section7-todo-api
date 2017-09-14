@@ -1,15 +1,17 @@
 const expect = require('expect');
 const supertestRequest = require('supertest');
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server.js');
 const{Todo} = require('./../models/todo.js');
 const{User} = require('./../models/user.js');
 
 
-
 const todos = [{
+  _id: new ObjectID,
   text: 'First test todo',
 }, {
+  _id: new ObjectID,
   text: 'Second test todo'
 }];
 //this runs code before each test case. if we expect only one todo (we expect that below), we pbviously need the database to be empty when the test starts
@@ -70,7 +72,7 @@ describe('POST /todos', () =>{
   })
 });
 
-describe('GET /todos', () => {
+describe('GET /todos and GET /todos/:id', () => {
   it('Should get all the todos', (done) => {
     supertestRequest(app)
       .get('/todos')
@@ -82,7 +84,7 @@ describe('GET /todos', () => {
       }).end( (err, res) => {
         if (err){
           return done(err);
-        }
+        };
 
         Todo.find().then((dbtodos) => {
           expect(dbtodos.length).toBe(2);
@@ -90,6 +92,31 @@ describe('GET /todos', () => {
           expect(dbtodos[1].text).toBe(todos[1].text);
           done();
         }).catch((e) => done(e));
-      })
-  })
-})
+      });
+  });
+
+  it('should return the todo doc', (done) => {
+    supertestRequest(app)
+      .get(`/todos/${todos[0]._id.toHexString()}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(todos[0].text);
+        expect(res.body.todo._id).toBe(todos[0]._id.toHexString());
+      }).end(done);
+    });
+
+    it('should return a 404 if todo not found', (done) => {
+      supertestRequest(app)
+        .get(`/todos/${(new ObjectID).toHexString()}`)
+        .expect(404)
+        .end(done);
+    });
+
+    it('should return a 402(inaccurate error, but for testing) if object ID is not valid', (done) => {
+      supertestRequest(app)
+        .get(`/todos/123`)
+        .expect(402)
+        .end(done);
+    });
+
+});
