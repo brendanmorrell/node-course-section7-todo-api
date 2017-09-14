@@ -36,10 +36,27 @@ app.post('/todos', (req, res) => {
   });
 });
 
+app.get('/todos', (req, res) => {
+  Todo.find().then((todos) => {
+    res.send({todos:todos});//could pass in todos instead of an object, but if you do this, you can't chain functions on it because it is an array instead of an object
+  }, (e) => {
+    res.status(400).send(e);
+  });
+});
+
+app.get('/users', (req, res) =>{
+  User.find().then( (users) => {
+    res.send({users});
+  }, (e) => {
+    res.status(400).send(e);
+  });
+});
+
+
+
 var port=3000
 app.listen(port, () => {
   console.log('Started on port 3000')
 });
-
 
 module.exports = {app};
