@@ -7,6 +7,12 @@ var {Todo} = require('./models/todo.js');
 var {User} = require('./models/user.js');
 
 var app = express();
+//this sets this variable such that it will be set if the app is running on heroku but won't be set if mongo is running locally
+const port = process.env.PORT || 3000;
+
+
+
+
 //have express configure middleware (bodyparser in this instance)
 app.use(bodyParser.json())//this json method on body parser returns a function that is the middleware, and that is what we give to express. now we can send json to our express app
 
@@ -71,9 +77,8 @@ app.get('/users', (req, res) =>{
 
 //valid todo id= 59bae78800d97624af8d945e
 
-var port=3000
 app.listen(port, () => {
-  console.log('Started on port 3000')
+  console.log(`Started on port ${port}`);
 });
 
 module.exports = {app};
