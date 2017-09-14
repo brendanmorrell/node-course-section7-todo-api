@@ -55,7 +55,7 @@ app.get('/todos/:todoid', (req, res) => {
   var id = req.params.todoid;
 
   if(!ObjectID.isValid(id)){
-    return res.status(402).send('error');
+    return res.status(402).send('error. user id is not valid Object ID');
   }
   Todo.findById(id).then((todo) => {
     if(!todo){
