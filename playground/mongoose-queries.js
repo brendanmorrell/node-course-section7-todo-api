@@ -7,7 +7,7 @@ const {User} =require('./../server/models/user.js')
 var id = '59bae78800d97624af8d945d11'
 
 
-/*if(!ObjectID.isValid(id)){
+if(!ObjectID.isValid(id)){
   return console.log('ID is not valid');
 }
 
@@ -37,7 +37,7 @@ Todo.findById(id).then((res) => {
     return console.log('Id not found');
   }
   console.log('todo', res)
-});*/
+});
 
 //challenge: do the same thing with User
 var id = '59bad913a7ddf5184747bb99'

@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 
+var {ObjectID} =require('mongodb')
 var {mongoose} = require('./db/mongoose.js');
 var {Todo} = require('./models/todo.js');
 var {User} = require('./models/user.js');
@@ -44,6 +45,22 @@ app.get('/todos', (req, res) => {
   });
 });
 
+app.get('/todos/:todoid', (req, res) => {
+  var id = req.params.todoid;
+
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send('error');
+  }
+  Todo.findById(id).then((todo) => {
+    if(!todo){
+      return res.status(404).send('user id not found');
+    };
+    res.send({todo});
+  }).catch((e)=>{
+    res.status(400).send();
+  });
+});
+
 app.get('/users', (req, res) =>{
   User.find().then( (users) => {
     res.send({users});
@@ -52,7 +69,7 @@ app.get('/users', (req, res) =>{
   });
 });
 
-
+//valid todo id= 59bae78800d97624af8d945e
 
 var port=3000
 app.listen(port, () => {
