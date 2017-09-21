@@ -1,3 +1,5 @@
+require('./config/config');
+
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -8,10 +10,6 @@ const {Todo} = require('./models/todo.js');
 const {User} = require('./models/user.js');
 
 var app = express();
-//this sets this variable such that it will be set if the app is running on heroku but won't be set if mongo is running locally
-const port = process.env.PORT || 3000;
-
-
 
 
 //have express configure middleware (bodyparser in this instance)
@@ -201,8 +199,8 @@ app.patch('/users/:id', (req, res) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`Started on port ${port}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Started on port ${process.env.PORT}`);
 });
 
 module.exports = {app};
