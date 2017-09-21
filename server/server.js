@@ -76,12 +76,22 @@ app.delete('/todos/:id', (req, res) => {
     if (!result) {
       return res.status(404).send(`Error: No todo found with id: ${id}`);
     }
-    res.status(200).send(`The following todo has been removed: ${result}`);
+    res.status(200).send({result});
   }).catch((e) => {
     res.status(400).send(e);
   });
-
 })
+
+app.delete('/todos', (req, res) => {
+  Todo.remove({}).then((result) => {
+    if (!result){
+      return res.status(404).send('Error');
+    }
+    res.status(200).send({result});
+  }).catch((e) => {
+    res.status(400).send(e)
+  });
+});
 
 app.get('/users', (req, res) =>{
   User.find().then( (users) => {
@@ -108,6 +118,20 @@ app.get('/users/:id', (req, res) => {
   });
 });
 
+
+
+app.delete('/users', (req, res) => {
+  User.remove({}).then((result) => {
+    if(!result){
+      return res.status(404).send('Error');
+    }
+    res.status(200).send({result});
+  }).catch((e) =>{
+    res.status(400).send(e);
+  });
+});
+
+
 app.delete('/users/:id', (req, res) => {
   var id = req.params.id;
   if (!ObjectID.isValid(id)){
@@ -117,7 +141,7 @@ app.delete('/users/:id', (req, res) => {
     if(!result){
       res.status(404).send(`Error. user id '${id}' not found`);
     }
-    res.status(200).send(`Successfully removed the following user id: ${result}`);
+    res.status(200).send({result});
   }).catch((e) => {
     res.status(400).send(`Error: ${e}`);
   });

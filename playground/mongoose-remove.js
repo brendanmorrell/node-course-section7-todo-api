@@ -6,9 +6,9 @@ const {User} =require('./../server/models/user.js')
 
 //removes whatever documents match the query
 //can't delete everything by passing in empty query like find does. need empty object
-/*Todo.remove({}).then((result) => {
+Todo.remove({}).then((result) => {
   console.log(result);
-})*/
+})
 
 
 //these methods will actually return the removed document back to you, which is useful
@@ -22,4 +22,4 @@ Todo.findOneAndRemove({
 Todo.findByIdAndRemove('59c2e714a1b6f15115a4f335').then((todo) => {
   console.log(`The following Todo has been deleted: `);
   console.log(todo);
-});*/
+});
