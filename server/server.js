@@ -182,6 +182,25 @@ app.patch('/todos/:id', (req, res) => {
   })
 });
 
+
+app.patch('/users/:id', (req, res) => {
+  var id = req.params.id;
+  var body = _.pick(req.body, ['email']);
+
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send('Error. id is not a valid ObjectID');
+  }
+
+  User.findByIdAndUpdate(id, {$set: body}, {new: true}).then((user) => {
+    if(!user){
+      return res.status(404).send('No matching user id found in database');
+    }
+    res.status(200).send({user});
+  }).catch((e) => {
+    res.status(400).send(e);
+  });
+});
+
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
 });
