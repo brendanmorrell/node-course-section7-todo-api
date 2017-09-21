@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const expect = require('expect');
 const supertestRequest = require('supertest');
 const {ObjectID} = require('mongodb');
@@ -12,7 +13,9 @@ const todos = [{
   text: 'First test todo',
 }, {
   _id: new ObjectID,
-  text: 'Second test todo'
+  text: 'Second test todo',
+  completed: true,
+  completedAt: 333
 }];
 //this runs code before each test case. if we expect only one todo (we expect that below), we pbviously need the database to be empty when the test starts
 beforeEach((done) => {
@@ -161,4 +164,63 @@ describe('DELETE /todos/:id', () => {
       .expect(404)
       .end(done);
   });
+});
+
+
+describe('PATCH /todos/:id', () => {
+  it('should patch the todo info', (done) => {
+    var oldBody = todos[0];
+    var newBody = {
+      text: "new text",
+      completed: true
+    };
+    var hexId = todos[0]._id.toHexString();
+    supertestRequest(app)
+      .patch(`/todos/${hexId}`)
+      .send(newBody)
+      .expect(200)
+      .expect((resp) => {
+        expect(resp.body.todo.text).toBe(newBody.text);
+        expect(resp.body.todo.completed).toBe(newBody.completed);
+        expect(resp.body.todo.completedAt).toBeA('number');
+      }).end( (err, resp) => {
+          if (err) {
+            return done(err);
+          }
+          Todo.find({
+            text: oldBody.text,
+            completed: oldBody.completed
+          }).then((res) => {
+            expect(res.text && res.completed).toNotExist();
+            done();
+          }).catch( (e) => {
+            return done(e);
+          })
+    });
+  });
+
+
+
+  it('should clear completedAtwhen todo is not completed', (done) => {
+    var newBody = {
+      text:'booblybobblywobble',
+      completed:false
+    };
+    var hexId = todos[1]._id.toHexString();
+
+    supertestRequest(app)
+      .patch(`/todos/${hexId}`)
+      .send(newBody)
+      .expect(200)
+      .expect((resp) => {
+        expect(resp.body.todo.text).toBe(newBody.text);
+        expect(resp.body.todo.completedAt).toNotExist();
+      }).end((err, res) => {
+        if(err){
+          return done(err);
+        }
+        done();
+      })
+  });
+
 });
