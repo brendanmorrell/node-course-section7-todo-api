@@ -51,11 +51,11 @@ app.get('/todos', (req, res) => {
   });
 });
 
-app.get('/todos/:todoid', (req, res) => {
-  var id = req.params.todoid;
+app.get('/todos/:id', (req, res) => {
+  var id = req.params.id;
 
   if(!ObjectID.isValid(id)){
-    return res.status(402).send('error. user id is not valid Object ID');
+    return res.status(404).send('error. user id is not valid Object ID');
   }
   Todo.findById(id).then((todo) => {
     if(!todo){
@@ -67,11 +67,59 @@ app.get('/todos/:todoid', (req, res) => {
   });
 });
 
+app.delete('/todos/:id', (req, res) => {
+  var id = req.params.id;
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send('Error. User id is not valid ObjectID');
+  };
+  Todo.findByIdAndRemove(id).then((result) => {
+    if (!result) {
+      return res.status(404).send(`Error: No todo found with id: ${id}`);
+    }
+    res.status(200).send(`The following todo has been removed: ${result}`);
+  }).catch((e) => {
+    res.status(400).send(e);
+  });
+
+})
+
 app.get('/users', (req, res) =>{
   User.find().then( (users) => {
     res.send({users});
   }, (e) => {
     res.status(400).send(e);
+  });
+});
+
+
+
+app.get('/users/:id', (req, res) => {
+  var id = req.params.id;
+  if (!ObjectID.isValid(id)){
+    return res.status(404).send('Error. User ID invalid');
+  }
+  User.findById(id).then((user) => {
+    if(!user){
+      return res.status(404).send('User id not found in database');
+    }
+    res.send({user});
+  }).catch((e) => {
+    res.status(400).send(e);
+  });
+});
+
+app.delete('/users/:id', (req, res) => {
+  var id = req.params.id;
+  if (!ObjectID.isValid(id)){
+    return res.status(404).send('Error. id is not a valid ObjectID');
+  }
+  User.findByIdAndRemove(id).then((result) => {
+    if(!result){
+      res.status(404).send(`Error. user id '${id}' not found`);
+    }
+    res.status(200).send(`Successfully removed the following user id: ${result}`);
+  }).catch((e) => {
+    res.status(400).send(`Error: ${e}`);
   });
 });
 
