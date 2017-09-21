@@ -1,10 +1,11 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
 
-var {ObjectID} =require('mongodb')
-var {mongoose} = require('./db/mongoose.js');
-var {Todo} = require('./models/todo.js');
-var {User} = require('./models/user.js');
+const {ObjectID} =require('mongodb')
+const {mongoose} = require('./db/mongoose.js');
+const {Todo} = require('./models/todo.js');
+const {User} = require('./models/user.js');
 
 var app = express();
 //this sets this variable such that it will be set if the app is running on heroku but won't be set if mongo is running locally
@@ -148,6 +149,38 @@ app.delete('/users/:id', (req, res) => {
 });
 
 //valid todo id= 59bae78800d97624af8d945e
+
+
+
+
+app.patch('/todos/:id', (req, res) => {
+  var id = req.params.id;
+  //we only want some of the body properties to be updateable (the ones that we assigned to the object, and are defined by the user, so not something like completedAT). lodash's .pick does this. you pass in the object as the first argument, and then an array with the properties you want to grab out
+  //this basically takes what the user gives us and picks out only what we want them to be able to update
+  var body = _.pick(req.body, ['text', 'completed']);
+
+  if (!ObjectID.isValid(id)){
+    return res.status(404).send('Error. id is not a valid ObjectID')
+  }
+
+  if(_.isBoolean(body.completed) && body.completed) {
+    //if it is a boolean and it's true
+    body.completedAt = new Date().getTime();
+  } else {
+    //if it isn't a boolean or it is false
+    body.completed = false;
+    body.completedAt = null;
+  }
+  //put in id, then use the mongodb operator to define what you want to do (set), then put the new body in as the object that you will be setting elements of, and then the last argument is a few options you can define. in this case, we want to return the new object that we set, not the object before the changes, so we set new to true
+  Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+    if(!todo){
+      return res.status(404).send('No matching todo found in the database');
+    }
+    res.send({todo});
+  }).catch((e) => {
+    res.status(400).send(e);
+  })
+});
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
