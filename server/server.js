@@ -10,24 +10,13 @@ const {Todo} = require('./models/todo.js');
 const {User} = require('./models/user.js');
 
 var app = express();
-
+const port = process.env.PORT;
 
 //have express configure middleware (bodyparser in this instance)
-app.use(bodyParser.json())//this json method on body parser returns a function that is the middleware, and that is what we give to express. now we can send json to our express app
+app.use(bodyParser.json());//this json method on body parser returns a function that is the middleware, and that is what we give to express. now we can send json to our express app
 
 
 
-
-app.post('/users', (req, res) => {
-  var user = new User({
-    email: req.body.email
-  });
-  user.save().then((doc) => {
-    res.send(doc);
-  }, (e) => {
-    res.status(400).send(e);
-  });
-});
 
 app.post('/todos', (req, res) => {
   var todo = new Todo({
@@ -41,6 +30,22 @@ app.post('/todos', (req, res) => {
     res.status(400).send(e);
   });
 });
+
+
+app.post('/users', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new User(body)
+
+  user.save().then(() => {
+    return user.generateAuthToken();
+  }).then((token) => {
+    //headers take key value pairs. those beginning with x- mean custom header (not necessarilly recognized by http)
+    res.header('x-auth', token).send(user)
+  }).catch((e) => {
+    res.status(400).send(e);
+  });
+});
+
 
 app.get('/todos', (req, res) => {
   Todo.find().then((todos) => {
@@ -180,7 +185,7 @@ app.patch('/todos/:id', (req, res) => {
   })
 });
 
-
+//PATCH /users/:id
 app.patch('/users/:id', (req, res) => {
   var id = req.params.id;
   var body = _.pick(req.body, ['email']);
@@ -199,8 +204,8 @@ app.patch('/users/:id', (req, res) => {
   });
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Started on port ${process.env.PORT}`);
+app.listen(port, () => {
+  console.log(`Started on port ${port}`);
 });
 
 module.exports = {app};
