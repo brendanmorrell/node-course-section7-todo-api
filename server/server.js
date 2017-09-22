@@ -5,17 +5,16 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const {ObjectID} =require('mongodb')
-const {mongoose} = require('./db/mongoose.js');
-const {Todo} = require('./models/todo.js');
-const {User} = require('./models/user.js');
+var {mongoose} = require('./db/mongoose.js');
+var {Todo} = require('./models/todo.js');
+var {User} = require('./models/user.js');
+var {authenticate} = require('./middleware/authenticate.js');
 
 var app = express();
 const port = process.env.PORT;
 
 //have express configure middleware (bodyparser in this instance)
 app.use(bodyParser.json());//this json method on body parser returns a function that is the middleware, and that is what we give to express. now we can send json to our express app
-
-
 
 
 app.post('/todos', (req, res) => {
@@ -30,22 +29,6 @@ app.post('/todos', (req, res) => {
     res.status(400).send(e);
   });
 });
-
-
-app.post('/users', (req, res) => {
-  var body = _.pick(req.body, ['email', 'password']);
-  var user = new User(body)
-
-  user.save().then(() => {
-    return user.generateAuthToken();
-  }).then((token) => {
-    //headers take key value pairs. those beginning with x- mean custom header (not necessarilly recognized by http)
-    res.header('x-auth', token).send(user)
-  }).catch((e) => {
-    res.status(400).send(e);
-  });
-});
-
 
 app.get('/todos', (req, res) => {
   Todo.find().then((todos) => {
@@ -97,65 +80,6 @@ app.delete('/todos', (req, res) => {
   });
 });
 
-app.get('/users', (req, res) =>{
-  User.find().then( (users) => {
-    res.send({users});
-  }, (e) => {
-    res.status(400).send(e);
-  });
-});
-
-
-
-app.get('/users/:id', (req, res) => {
-  var id = req.params.id;
-  if (!ObjectID.isValid(id)){
-    return res.status(404).send('Error. User ID invalid');
-  }
-  User.findById(id).then((user) => {
-    if(!user){
-      return res.status(404).send('User id not found in database');
-    }
-    res.send({user});
-  }).catch((e) => {
-    res.status(400).send(e);
-  });
-});
-
-
-
-app.delete('/users', (req, res) => {
-  User.remove({}).then((result) => {
-    if(!result){
-      return res.status(404).send('Error');
-    }
-    res.status(200).send({result});
-  }).catch((e) =>{
-    res.status(400).send(e);
-  });
-});
-
-
-app.delete('/users/:id', (req, res) => {
-  var id = req.params.id;
-  if (!ObjectID.isValid(id)){
-    return res.status(404).send('Error. id is not a valid ObjectID');
-  }
-  User.findByIdAndRemove(id).then((result) => {
-    if(!result){
-      res.status(404).send(`Error. user id '${id}' not found`);
-    }
-    res.status(200).send({result});
-  }).catch((e) => {
-    res.status(400).send(`Error: ${e}`);
-  });
-});
-
-//valid todo id= 59bae78800d97624af8d945e
-
-
-
-
 app.patch('/todos/:id', (req, res) => {
   var id = req.params.id;
   //we only want some of the body properties to be updateable (the ones that we assigned to the object, and are defined by the user, so not something like completedAT). lodash's .pick does this. you pass in the object as the first argument, and then an array with the properties you want to grab out
@@ -185,7 +109,76 @@ app.patch('/todos/:id', (req, res) => {
   })
 });
 
-//PATCH /users/:id
+//My Own Stuff
+app.post('/users', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new User(body)
+
+  user.save().then(() => {
+    return user.generateAuthToken();
+  }).then((token) => {
+    //headers take key value pairs. those beginning with x- mean custom header (not necessarilly recognized by http)
+    res.header('x-auth', token).send(user)
+  }).catch((e) => {
+    res.status(400).send(e);
+  });
+});
+
+/*app.get('/users/:id', (req, res) => {
+  var id = req.params.id;
+  if (!ObjectID.isValid(id)){
+    return res.status(404).send('Error. User ID invalid');
+  }
+  User.findById(id).then((user) => {
+    if(!user){
+      return res.status(404).send('User id not found in database');
+    }
+    res.send({user});
+  }).catch((e) => {
+    res.status(400).send(e);
+  });
+});*/
+
+
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user)
+})
+
+/*app.get('/users', (req, res) =>{
+  User.find().then( (users) => {
+    res.send({users});
+  }, (e) => {
+    res.status(400).send(e);
+  });
+});
+
+app.delete('/users', (req, res) => {
+  User.remove({}).then((result) => {
+    if(!result){
+      return res.status(404).send('Error');
+    }
+    res.status(200).send({result});
+  }).catch((e) =>{
+    res.status(400).send(e);
+  });
+});
+
+
+app.delete('/users/:id', (req, res) => {
+  var id = req.params.id;
+  if (!ObjectID.isValid(id)){
+    return res.status(404).send('Error. id is not a valid ObjectID');
+  }
+  User.findByIdAndRemove(id).then((result) => {
+    if(!result){
+      res.status(404).send(`Error. user id '${id}' not found`);
+    }
+    res.status(200).send({result});
+  }).catch((e) => {
+    res.status(400).send(`Error: ${e}`);
+  });
+});
+
 app.patch('/users/:id', (req, res) => {
   var id = req.params.id;
   var body = _.pick(req.body, ['email']);
@@ -203,6 +196,7 @@ app.patch('/users/:id', (req, res) => {
     res.status(400).send(e);
   });
 });
+*/
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
