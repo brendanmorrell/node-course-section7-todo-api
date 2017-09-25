@@ -124,79 +124,27 @@ app.post('/users', (req, res) => {
   });
 });
 
-/*app.get('/users/:id', (req, res) => {
-  var id = req.params.id;
-  if (!ObjectID.isValid(id)){
-    return res.status(404).send('Error. User ID invalid');
-  }
-  User.findById(id).then((user) => {
-    if(!user){
-      return res.status(404).send('User id not found in database');
-    }
-    res.send({user});
+
+app.post('/users/login', (req, res) => {
+/*  var email = req.params.email;
+  var password = req.params.password;*/
+  var body = _.pick(req.body, ['email', 'password']);
+  //body.password = bcrypt.hash(body.password)
+  User.findByCredentials(body.email, body.password).then((user) => {
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    })
+    res.status(200).send(user);
   }).catch((e) => {
     res.status(400).send(e);
   });
-});*/
+})
 
 
 app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user)
 })
 
-/*app.get('/users', (req, res) =>{
-  User.find().then( (users) => {
-    res.send({users});
-  }, (e) => {
-    res.status(400).send(e);
-  });
-});
-
-app.delete('/users', (req, res) => {
-  User.remove({}).then((result) => {
-    if(!result){
-      return res.status(404).send('Error');
-    }
-    res.status(200).send({result});
-  }).catch((e) =>{
-    res.status(400).send(e);
-  });
-});
-
-
-app.delete('/users/:id', (req, res) => {
-  var id = req.params.id;
-  if (!ObjectID.isValid(id)){
-    return res.status(404).send('Error. id is not a valid ObjectID');
-  }
-  User.findByIdAndRemove(id).then((result) => {
-    if(!result){
-      res.status(404).send(`Error. user id '${id}' not found`);
-    }
-    res.status(200).send({result});
-  }).catch((e) => {
-    res.status(400).send(`Error: ${e}`);
-  });
-});
-
-app.patch('/users/:id', (req, res) => {
-  var id = req.params.id;
-  var body = _.pick(req.body, ['email']);
-
-  if(!ObjectID.isValid(id)){
-    return res.status(404).send('Error. id is not a valid ObjectID');
-  }
-
-  User.findByIdAndUpdate(id, {$set: body}, {new: true}).then((user) => {
-    if(!user){
-      return res.status(404).send('No matching user id found in database');
-    }
-    res.status(200).send({user});
-  }).catch((e) => {
-    res.status(400).send(e);
-  });
-});
-*/
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
