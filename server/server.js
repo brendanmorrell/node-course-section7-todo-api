@@ -125,11 +125,13 @@ app.post('/users', (req, res) => {
 });
 
 
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user)
+})
+
+
 app.post('/users/login', (req, res) => {
-/*  var email = req.params.email;
-  var password = req.params.password;*/
   var body = _.pick(req.body, ['email', 'password']);
-  //body.password = bcrypt.hash(body.password)
   User.findByCredentials(body.email, body.password).then((user) => {
     return user.generateAuthToken().then((token) => {
       res.header('x-auth', token).send(user);
@@ -141,9 +143,7 @@ app.post('/users/login', (req, res) => {
 })
 
 
-app.get('/users/me', authenticate, (req, res) => {
-  res.send(req.user)
-})
+
 
 
 app.listen(port, () => {
