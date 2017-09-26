@@ -5,7 +5,7 @@ var authenticate = (req,res, next) => {
 
   User.findByToken(token).then((user) => {
     if(!user) {
-      return Promise.reject('Validation successful, but no user found');
+      return Promise.reject('Unable to find instance data');
     }
 
     req.user = user;

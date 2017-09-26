@@ -48,7 +48,7 @@ app.get('/todos/:id', authenticate, (req, res) => {
     _creator:req.user._id
   }).then((todo) => {
     if(!todo){
-      return res.status(404).send('user id not found');
+      return res.status(404).send(`todo with id ${id} not found`);
     };
     res.send({todo});
   }).catch((e)=>{
