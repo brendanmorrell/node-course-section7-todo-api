@@ -42,13 +42,13 @@ app.get('/todos/:id', authenticate, (req, res) => {
   var id = req.params.id;
 
   if(!ObjectID.isValid(id)){
-    return res.status(404).send('error. user id is not valid Object ID');
+    return res.status(404).send(`Error: Id ${id}  is not a valid ObjectID`);
   }
   Todo.findOne({_id: id,
     _creator:req.user._id
   }).then((todo) => {
     if(!todo){
-      return res.status(404).send(`todo with id ${id} not found`);
+      return res.status(404).send(`Error: No todo found with id: ${id}`);
     };
     res.send({todo});
   }).catch((e)=>{
@@ -59,7 +59,7 @@ app.get('/todos/:id', authenticate, (req, res) => {
 app.delete('/todos/:id', authenticate, (req, res) => {
   var id = req.params.id;
   if(!ObjectID.isValid(id)){
-    return res.status(404).send('Error. User id is not valid ObjectID');
+    return res.status(404).send(`Error: Id ${id}  is not a valid ObjectID`);
   };
   Todo.findOneAndRemove({
     _id:id,
@@ -92,7 +92,7 @@ app.patch('/todos/:id', authenticate, (req, res) => {
   var body = _.pick(req.body, ['text', 'completed']);
 
   if (!ObjectID.isValid(id)){
-    return res.status(404).send('Error. id is not a valid ObjectID')
+    return res.status(404).send(`Error: Id ${id}  is not a valid ObjectID`)
   }
 
   if(_.isBoolean(body.completed) && body.completed) {
@@ -106,7 +106,7 @@ app.patch('/todos/:id', authenticate, (req, res) => {
   //put in id, then use the mongodb operator to define what you want to do (set), then put the new body in as the object that you will be setting elements of, and then the last argument is a few options you can define. in this case, we want to return the new object that we set, not the object before the changes, so we set new to true
   Todo.findOneAndUpdate({_id:id, _creator: req.user._id}, {$set: body}, {new: true}).then((todo) => {
     if(!todo){
-      return res.status(404).send('No matching todo found in the database');
+      return res.status(404).send(`Error: No todo found with id: ${id}`);
     }
     res.send({todo});
   }).catch((e) => {
