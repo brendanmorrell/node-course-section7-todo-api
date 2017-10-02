@@ -11,9 +11,9 @@ const {todos, users, populateTodos, populateUsers} = require('./seed/seed.js');
 beforeEach(populateUsers);
 beforeEach(populateTodos);
 
-describe('POST /todos', () =>{
+describe('POST /todos',  () =>{
   it('should create a new todo', (done) => {//done argument needs to be sent in for async tests
-    var text = 'Test todo text';
+    const text = 'Test todo text';
 
     supertestRequest(app)
       .post('/todos')
@@ -37,9 +37,9 @@ describe('POST /todos', () =>{
   });
 
   it('should not create a todo if the data is not a string of at least one character', (done) => {
-    var noText='';   //mongoose automatically converts numbers and booleans to strings so the bottom two are unnecessary
-//    var number=5;
-//    var boolean=false;
+    const noText='';   //mongoose automatically converts numbers and booleans to strings so the bottom two are unnecessary
+//    const number=5;
+//    const boolean=false;
 
     supertestRequest(app)
       .post('/todos')
@@ -125,7 +125,7 @@ describe('GET /todos and GET /todos/:id', () => {
 
 describe('DELETE /todos/:id', () => {
   it('should remove a todo', (done) => {
-    var hexId = todos[1]._id.toHexString();
+    const hexId = todos[1]._id.toHexString();
 
     supertestRequest(app)
       .delete(`/todos/${hexId}`)
@@ -147,7 +147,7 @@ describe('DELETE /todos/:id', () => {
   });
 
   it('should not remove a todo that belongs to another user', (done) => {
-    var hexId = todos[0]._id.toHexString();
+    const hexId = todos[0]._id.toHexString();
     supertestRequest(app)
       .delete(`/todos/${hexId}`)
       .set('x-auth', users[1].tokens[0].token)
@@ -163,7 +163,7 @@ describe('DELETE /todos/:id', () => {
       });
   });
   it('should return 404 if todo not found', (done) => {
-    var hexId = new ObjectID().toHexString();
+    const hexId = new ObjectID().toHexString();
 
     supertestRequest(app)
       .delete(`/todos/${hexId}`)
@@ -173,7 +173,7 @@ describe('DELETE /todos/:id', () => {
   });
 
   it('should return 404 if objectID is invalid', (done) => {
-    var hexId = 111
+    const hexId = 111
 
     supertestRequest(app)
       .delete(`/todos/${hexId}`)
@@ -186,12 +186,12 @@ describe('DELETE /todos/:id', () => {
 
 describe('PATCH /todos/:id', () => {
   it('should patch the todo info', (done) => {
-    var oldBody = todos[0];
-    var newBody = {
+    const oldBody = todos[0];
+    const newBody = {
       text: "new text",
       completed: true
     };
-    var hexId = todos[0]._id.toHexString();
+    const hexId = todos[0]._id.toHexString();
     supertestRequest(app)
       .patch(`/todos/${hexId}`)
       .set('x-auth', users[0].tokens[0].token)
@@ -218,8 +218,8 @@ describe('PATCH /todos/:id', () => {
   });
 
   it('should only patch todos belonging to the logged in user', (done) => {
-    var hexId = todos[0]._id.toHexString();
-    var text = "new text"
+    const hexId = todos[0]._id.toHexString();
+    const text = "new text"
     supertestRequest(app)
       .patch(`/todos/${hexId}`)
       .set('x-auth', users[1].tokens[0].token)
@@ -240,7 +240,7 @@ describe('PATCH /todos/:id', () => {
 
 
   it('should clear completedAtwhen todo is not completed', (done) => {
-    var hexId = todos[1]._id.toHexString();
+    const hexId = todos[1]._id.toHexString();
 
     supertestRequest(app)
       .patch(`/todos/${hexId}`)
@@ -289,8 +289,8 @@ describe('GET /users/me', () => {
 
 describe('POST /users', () => {
   it('should create a user', (done) => {
-    var email = 'example@example.com'
-    var password = 'password'
+    const email = 'example@example.com'
+    const password = 'password'
     supertestRequest(app)
       .post('/users')
       .send({email, password})
@@ -313,8 +313,8 @@ describe('POST /users', () => {
   });
 
   it('should return validation errors if request invalid', (done) => {
-    var emailInv = 'email@email'
-    var passwordInv = 'pass'
+    const emailInv = 'email@email'
+    const passwordInv = 'pass'
 
     supertestRequest(app)
       .post('/users')
@@ -324,8 +324,8 @@ describe('POST /users', () => {
   });
 
   it('should not create user if email in use', (done) => {
-    var email = users[0].email
-    var password = 'password'
+    const email = users[0].email
+    const password = 'password'
     supertestRequest(app)
       .post('/users')
       .send({email, password})
@@ -362,8 +362,8 @@ describe('POST /users/login', () => {
   });
 
   it('should reject invalid login', (done) => {
-    var emailInv = "invalidemail@email.com"
-    var passwordInv = "invalidpassword"
+    const emailInv = "invalidemail@email.com"
+    const passwordInv = "invalidpassword"
     supertestRequest(app)
       .post('/users/login')
       .send({emailInv, passwordInv})
@@ -403,7 +403,7 @@ describe('DELETE /users/me/token', () => {
   });
 
   it('should return an error if the token does not exist', (done) => {
-    var invalidToken = "skuhsajdkhasjdhasjkdhasjdhasjkdhask"
+    const invalidToken = "skuhsajdkhasjdhasjkdhasjdhasjkdhask"
     supertestRequest(app)
       .delete('/users/me/token')
       .set('x-auth', invalidToken)
